@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Cron Job Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Linux Cron Job Manager</h1>
+            <p>Manage your system cron jobs with ease</p>
+        </header>
+
+        <main>
+            <!-- Add New Job Section -->
+            <section class="add-job-section">
+                <h2>Add New Cron Job</h2>
+                <form id="addJobForm" class="job-form">
+                    <div class="form-group">
+                        <label for="jobName">Job Name:</label>
+                        <input type="text" id="jobName" name="name" required placeholder="e.g., backup-database">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cronExpression">Cron Expression:</label>
+                        <input type="text" id="cronExpression" name="expression" required placeholder="e.g., */5 * * * *">
+                        <small>Format: minute hour day month weekday</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobCommand">Bash Script:</label>
+                        <textarea id="jobCommand" name="command" required placeholder="#!/bin/bash&#10;echo 'Hello World'&#10;date >> /tmp/cron.log"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobDescription">Description (optional):</label>
+                        <input type="text" id="jobDescription" name="description" placeholder="What does this job do?">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Add Job</button>
+                </form>
+            </section>
+
+            <!-- Jobs List Section -->
+            <section class="jobs-section">
+                <h2>Cron Jobs</h2>
+                <div id="jobsList" class="jobs-list">
+                    <div class="loading">Loading jobs...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for job details -->
+    <div id="jobModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Job Details</h2>
+            <div id="jobDetails"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='/script.js') }}"></script>
+</body>
+</html> 
