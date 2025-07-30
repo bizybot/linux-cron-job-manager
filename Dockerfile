@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     cron \
     && rm -rf /var/lib/apt/lists/*
 
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
 # Copy requirements first for better caching
 COPY requirements.txt .
 
