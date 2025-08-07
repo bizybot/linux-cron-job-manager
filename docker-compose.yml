@@ -3,21 +3,14 @@ services:
     build: .
     ports:
       - "8000:8000"
+    privileged: true
     volumes:
       - ./data:/app/data
       - ./scripts:/app/scripts
-      # Mount your SSH private key. Replace ~/.ssh/id_rsa with the actual path to your key.
-      - ~/.ssh/id_rsa:/app/ssh/id_rsa:ro
+      - /var/spool/cron:/var/spool/cron
+      - /etc/cron.d:/etc/cron.d
     environment:
       - PYTHONPATH=/app
-      # Set to "true" to enable SSH mode
-      - USE_SSH=true
-      # SSH connection details for the host machine
-      - CRON_HOST=172.17.0.1 # Replace with your host's IP address or hostname
-      - CRON_USER=your_user # Replace with your username on the host
-      - CRON_SSH_KEY_PATH=/app/ssh/id_rsa
-      # Absolute path to the scripts directory on the host machine
-      - HOST_SCRIPTS_DIR=/path/to/your/linux-cron-job-manager/scripts # Replace with the correct absolute path
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/jobs"]
