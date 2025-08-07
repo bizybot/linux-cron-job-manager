@@ -8,27 +8,11 @@ logger = logging.getLogger(__name__)
 
 class CronService:
     def __init__(self, scripts_dir="scripts"):
-        self.host_scripts_dir = os.environ.get("HOST_SCRIPTS_DIR")
-        self.use_ssh = os.environ.get("USE_SSH", "false").lower() == "true"
-
-        if self.use_ssh:
-            ssh_host = os.environ.get("CRON_HOST")
-            ssh_user = os.environ.get("CRON_USER")
-            ssh_key = os.environ.get("CRON_SSH_KEY_PATH")
-
-            if not all([ssh_host, ssh_user, ssh_key]):
-                raise ValueError("CRON_HOST, CRON_USER, and CRON_SSH_KEY_PATH must be set when USE_SSH is true")
-
-            self.cron = CronTab(user=ssh_user, host=ssh_host, ssh_identity_file=ssh_key)
-        else:
-            self.cron = CronTab(user=True)
-
+        self.cron = CronTab(user=True)
         self.scripts_dir = os.path.join(os.getcwd(), scripts_dir)
         os.makedirs(self.scripts_dir, exist_ok=True)
 
-    def _get_script_path(self, name: str, on_host: bool = False) -> str:
-        if on_host and self.use_ssh:
-            return os.path.join(self.host_scripts_dir, f"{name}.sh")
+    def _get_script_path(self, name: str) -> str:
         return os.path.join(self.scripts_dir, f"{name}.sh")
 
     def add_job(self, name: str, expression: str, command: str) -> bool:
@@ -42,8 +26,7 @@ class CronService:
             
             os.chmod(container_script_path, 0o755)
 
-            host_script_path = self._get_script_path(name, on_host=True)
-            job = self.cron.new(command=host_script_path, comment=name)
+            job = self.cron.new(command=container_script_path, comment=name)
             job.setall(expression)
             self.cron.write()
 
