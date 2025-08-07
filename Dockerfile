@@ -28,6 +28,12 @@ RUN mkdir -p scripts
 # Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 
+# Add appuser to the crontab group and create crontab file
+RUN usermod -a -G crontab appuser && \
+    touch /var/spool/cron/crontabs/appuser && \
+    chown appuser:crontab /var/spool/cron/crontabs/appuser && \
+    chmod 0600 /var/spool/cron/crontabs/appuser
+
 # Switch to non-root user
 USER appuser
 
