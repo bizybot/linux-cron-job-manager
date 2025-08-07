@@ -40,6 +40,69 @@ A modern web-based application for managing cron jobs on Linux systems. Built wi
 3. **Access the application**
    Open your browser and navigate to `http://localhost:8000`
 
+### Connecting to the Host Crontab (SSH Mode)
+
+By default, the application manages the cron jobs inside the Docker container. To manage the cron jobs on the host machine, you need to enable SSH mode. This allows the application to securely connect to the host and manage its crontab.
+
+**1. Generate an SSH Key Pair**
+
+If you don't already have an SSH key, create a new one on your host machine:
+
+```bash
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/cron_manager_id_rsa
+```
+
+**2. Authorize the Public Key**
+
+Add the public key to your user's `authorized_keys` file on the host. This allows the application to log in without a password.
+
+```bash
+cat ~/.ssh/cron_manager_id_rsa.pub >> ~/.ssh/authorized_keys
+```
+
+**3. Configure `docker-compose.yml`**
+
+Update the `docker-compose.yml` file with your host's details:
+
+- **`USE_SSH`**: Set to `true` to enable SSH mode.
+- **`CRON_HOST`**: The IP address of your host machine. From within a Docker container, this is typically the IP of the Docker bridge network gateway (e.g., `172.17.0.1`). You can find it by running `ip addr show docker0` on your host.
+- **`CRON_USER`**: Your username on the host machine.
+- **`CRON_SSH_KEY_PATH`**: The path to the private key inside the container. The default is `/app/ssh/id_rsa`.
+- **`HOST_SCRIPTS_DIR`**: The absolute path to the `scripts` directory on your host machine (e.g., `/home/myuser/linux-cron-job-manager/scripts`).
+- **Volume Mount**: Make sure the volume mount for the SSH key points to the correct private key file on your host.
+
+Example `docker-compose.yml` configuration:
+
+```yaml
+services:
+  cron-manager:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./scripts:/app/scripts
+      # Mount your SSH private key.
+      - ~/.ssh/cron_manager_id_rsa:/app/ssh/id_rsa:ro
+    environment:
+      - PYTHONPATH=/app
+      - USE_SSH=true
+      - CRON_HOST=172.17.0.1
+      - CRON_USER=your_username
+      - CRON_SSH_KEY_PATH=/app/ssh/id_rsa
+      - HOST_SCRIPTS_DIR=/home/your_username/linux-cron-job-manager/scripts
+```
+
+**4. Start the Application**
+
+Now, build and run the container with the new configuration:
+
+```bash
+docker-compose up --build
+```
+
+The application will now connect to your host's crontab via SSH.
+
 ### Manual Installation
 
 1. **Install dependencies**
